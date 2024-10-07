@@ -14,7 +14,7 @@ const signup = async ({email, password, name}: {email: string, password: string,
     try {
         const user = await account.create(ID.unique(), email, password, name)
         const session = await login({email, password})
-        return session
+        return user
     } catch (error) {
         throw error
     }

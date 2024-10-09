@@ -1,5 +1,5 @@
 'use client'
-import { account, ID, OAuthProvider } from './conf'
+import { account, ID } from './conf'
 
 const login = async ({email, password}: {email: string, password: string}) => {
     try {
@@ -30,7 +30,7 @@ const getCurrentUser = async () => {
 }
 const logout = async () => {
     try {
-        await account.deleteSession('current')
+        await account.deleteSessions()
     } catch (error) {
         throw error
     }

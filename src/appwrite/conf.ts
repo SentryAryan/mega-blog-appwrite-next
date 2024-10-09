@@ -1,5 +1,5 @@
 'use client'
-import { Client, Account, Databases, Storage, Avatars, ID, OAuthProvider, Query } from 'appwrite';
+import { Client, Account, Databases, Storage, Avatars, ID, Query } from 'appwrite';
 import { projectId, apiEndpoint } from '@/config/config';
 
 const client = new Client();
@@ -12,4 +12,4 @@ const databases = new Databases(client);
 const storage = new Storage(client);
 const avatars = new Avatars(client);
 
-export { client, account, databases, storage, avatars, ID, OAuthProvider, Query };
+export { client, account, databases, storage, avatars, ID, Query };

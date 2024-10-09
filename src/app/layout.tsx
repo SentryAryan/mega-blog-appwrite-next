@@ -30,17 +30,16 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased `}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased dark`}
         suppressHydrationWarning
       >
         <StoreProvider> {/* Wrap children with StoreProvider */}
-          <div className="antialiased min-h-screen w-full dark:bg-black bg-white dark:bg-grid-white/[1] bg-grid-black/[1] relative flex items-center justify-center">
+          <div className="antialiased min-h-screen w-full dark:bg-black bg-white dark:bg-grid-white/[0.1] bg-grid-black/[0.1] relative flex items-center justify-center">
             <div className="navbar" style={{ height: 'var(--navbar-height)' }}>
               <NavBarMenu />
             </div>
             {children}
             <Toaster />
-            <div className="h-[50rem]"></div>
           </div>
         </StoreProvider>
       </body>

@@ -1,6 +1,7 @@
 'use client'
 import LoginForm from "@/components/LoginForm";
 import LoginSignupLayout from "@/components/LoginSignupLayout";
+import { BackgroundBeamsWithCollision } from "@/components/ui/background-beams-with-collision";
 
 export default function LoginPage() {
     return (

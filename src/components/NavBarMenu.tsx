@@ -8,6 +8,8 @@ import { logout as appwriteLogout } from "@/appwrite/auth";
 import { RootState } from "@/redux/store";
 import { logout } from "@/redux/slices/authSlice";
 import { useRouter } from "next/navigation";
+import { BackgroundBeamsWithCollision } from "@/components/ui/background-beams-with-collision";
+
 export function NavBarMenu() {
     return (
         <Navbar className="top-2" />
@@ -29,6 +31,7 @@ function Navbar({ className }: { className?: string }) {
             console.error(error);
         }
     }
+
     return (
         <div
             className={cn("fixed top-10 inset-x-0 max-w-2xl mx-auto z-50", className)}
@@ -50,20 +53,13 @@ function Navbar({ className }: { className?: string }) {
                                 </div>
                             </MenuItem>
                         </Link>
-                        <Link href="/all-posts">
-                            <MenuItem setActive={setActive} active={active} item="All Posts">
+                        <button onClick={deleteSession}>
+                            <MenuItem setActive={setActive} active={active} item="Logout">
                                 <div className="flex flex-col space-y-4 text-sm">
-                                    View all posts
+                                    Logout
                                 </div>
                             </MenuItem>
-                        </Link>
-                        <MenuItem setActive={setActive} active={active} item="Logout">
-                            <div className="flex flex-col space-y-4 text-sm">
-                                <button onClick={() => deleteSession()}>
-                                    Logout
-                                </button>
-                            </div>
-                        </MenuItem>
+                        </button>
                     </>
                 ) : (
                     <>

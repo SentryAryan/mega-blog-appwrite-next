@@ -7,6 +7,8 @@ import { useSelector } from 'react-redux'
 import { setLoading } from '@/redux/slices/loadingSlice'
 import { LoaderComponent } from '@/components/LoaderComponent'
 import { RootState } from '@/redux/store'
+import AuthLayout from '@/components/AuthLayout'
+import AllPosts from '@/components/AllPosts'
 
 export default function Home() {
   const dispatch = useDispatch()
@@ -19,13 +21,13 @@ export default function Home() {
       dispatch(setLoading(false))
     } catch (error) {
       console.log(error)
-      dispatch(logout())  
+      dispatch(logout())
       dispatch(setLoading(false))
     }
   }
 
   useEffect(() => {
-      fetchCurrentUser()
+    fetchCurrentUser()
   }, [authStatus])
 
   return (
@@ -33,9 +35,9 @@ export default function Home() {
       {loading ? (
         <LoaderComponent />
       ) : (
-        <main style={{ paddingTop: '4rem' }}>
-          
-        </main>
+        <AuthLayout>
+          <AllPosts />
+        </AuthLayout>
       )}
     </>
   )

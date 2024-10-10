@@ -2,7 +2,7 @@
 const nextConfig = {
     reactStrictMode: false,
     images: {
-        domains: ['assets.aceternity.com'],
+        domains: ['assets.aceternity.com', "cloud.appwrite.io"],
     },
 };
 

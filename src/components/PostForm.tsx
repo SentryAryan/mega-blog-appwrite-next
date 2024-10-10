@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useRef } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -9,24 +9,68 @@ import {
     IconBrandOnlyfans,
 } from "@tabler/icons-react";
 import { useForm } from "react-hook-form";
+import { Controller } from "react-hook-form";
+import { Editor as TinyMCEEditor } from 'tinymce'; // Import the correct Editor type
+import { Editor } from '@tinymce/tinymce-react'; // Import the React component
+import { useRouter } from "next/navigation";
+import { uploadFile, deleteFile, getFilePreview } from "@/appwrite/sotrage";
+import { useSelector } from "react-redux";
+import { FileUpload } from "./ui/file-upload";
+import { createPost, updatePost } from "@/appwrite/database";
+import Select from "./Select";
+import Image from "next/image";
+export function PostForm({ post }: { post?: any }) {
 
-export function PostForm() {
-
-    const { register, handleSubmit, formState: { errors } } = useForm({
+    const { register, handleSubmit, control, formState: { errors } } = useForm({
         defaultValues: {
-            title: "",
-            content: "",
-            status: "",
-            image: "",
+            title: post?.title || "",
+            content: post?.content || "",
+            status: post?.status || "",
+            image: null, // Initialize the image field
         },
     });
 
-    const onPostFormSubmit = (data: any) => {
-        console.log(data);
+    const editorRef = useRef<TinyMCEEditor | null>(null); // Use TinyMCEEditor for the ref type
+    const userData = useSelector((state: any) => state.auth.userData);
+    const plugins = [
+        'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
+        'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
+        'insertdatetime', 'media', 'table', 'emoticons', 'help'
+    ]
+    const toolbar = 'undo redo | formatselect | ' +
+        'bold italic backcolor | alignleft aligncenter ' +
+        'alignright alignjustify | bullist numlist outdent indent | ' +
+        'removeformat | help'
+
+    const onPostFormSubmit = async (data: any) => {
+        let dbPost;
+        try {
+            if (post) {
+                let featuredImage = post.featuredImage;
+                if (data.image[0]) {
+                    const file = await uploadFile(data.image[0]);
+                    await deleteFile(post.featuredImage);
+                    featuredImage = file.$id;
+                }
+                dbPost = await updatePost(post.$id, {
+                    ...data,
+                    featuredImage
+                });
+            } else {
+                const file = await uploadFile(data.image[0]);
+                dbPost = await createPost({
+                    ...data,
+                    featuredImage: file.$id,
+                    userId: userData.$id,
+                });
+            }
+        } catch (error) {
+            console.error(error);
+        }
     };
 
     return (
-        <div className="max-w-md w-full mx-auto rounded-none md:rounded-2xl p-4 md:p-8 shadow-input bg-white dark:bg-black">
+        <div className="w-full mx-auto rounded-none md:rounded-2xl p-4 md:p-8 shadow-input bg-white dark:bg-black">
             <h2 className="font-bold text-xl text-neutral-800 dark:text-neutral-200">
                 Welcome to MegaBlogApp
             </h2>
@@ -34,77 +78,84 @@ export function PostForm() {
                 Create a new post
             </p>
 
-            <form className="my-8" onSubmit={handleSubmit(onPostFormSubmit)}>
-                <div className="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-2 mb-4">
+            <form className="my-8 w-full" onSubmit={handleSubmit(onPostFormSubmit)}>
+                <div className="flex flex-col space-y-2 mb-4">
+                    {/* Title */}
                     <LabelInputContainer>
-                        <Label htmlFor="firstname">First name</Label>
-                        <Input id="firstname" placeholder="Tyler" type="text" {...register("title")} />
+                        <Label htmlFor="title">Title</Label>
+                        <Input id="title" placeholder="Title" type="text" {...register("title")} />
                     </LabelInputContainer>
-                    <LabelInputContainer>
-                        <Label htmlFor="lastname">Last name</Label>
-                        <Input id="lastname" placeholder="Durden" type="text" {...register("content")} />
-                    </LabelInputContainer>
-                </div>
-                <LabelInputContainer className="mb-4">
-                    <Label htmlFor="email">Email Address</Label>
-                    <Input id="email" placeholder="projectmayhem@fc.com" type="email" {...register("status")} />
-                </LabelInputContainer>
-                <LabelInputContainer className="mb-4">
-                    <Label htmlFor="password">Password</Label>
-                    <Input id="password" placeholder="••••••••" type="password" {...register("image")} />
-                </LabelInputContainer>
-                <LabelInputContainer className="mb-8">
-                    <Label htmlFor="twitterpassword">Your twitter password</Label>
-                    <Input
-                        id="twitterpassword"
-                        placeholder="••••••••"
-                        type="twitterpassword"
-                        {...register("image")}
+
+                    {/* Content Editor */}
+                    <Controller
+                        name={'content'}
+                        control={control}
+                        render={({ field: { onChange, value } }) => (
+                            <Editor
+                                apiKey={process.env.NEXT_PUBLIC_TINY_API_KEY}
+                                onInit={(evt, editor) => {
+                                    editorRef.current = editor; // This will now work without type errors
+                                }}
+                                initialValue={post?.content || ""}
+                                value={value}
+                                onEditorChange={onChange}
+                                init={{
+                                    height: 500,
+                                    menubar: true,
+                                    plugins: plugins,
+                                    toolbar: toolbar,
+                                    content_style: "body { background-color: black; color: white; }", // Set background color to black and text color to white
+                                    promotion: false,
+                                    branding: false,
+                                    convert_urls: false,
+                                    sandbox_iframes: true,
+                                    convert_unsafe_embeds: true
+                                }}
+                            />
+                        )}
                     />
-                </LabelInputContainer>
+
+                    {/* Image Upload */}
+                    <Controller
+                        name={`image`}
+                        control={control}
+                        render={({ field: { onChange } }) => (
+                            <FileUpload onChange={(files) => onChange(files)} />
+                        )}
+                    />
+
+                    {/* Status */}
+                    <Select
+                        label="Status:"
+                        options={['active', 'inactive']}
+                        className="mb-4"
+                        {...register("status")}
+                        errors={errors}
+                    />
+                </div>
 
                 <button
                     className="bg-gradient-to-br relative group/btn from-black dark:from-zinc-900 dark:to-zinc-900 to-neutral-600 block dark:bg-zinc-800 w-full text-white rounded-md h-10 font-medium shadow-[0px_1px_0px_0px_#ffffff40_inset,0px_-1px_0px_0px_#ffffff40_inset] dark:shadow-[0px_1px_0px_0px_var(--zinc-800)_inset,0px_-1px_0px_0px_var(--zinc-800)_inset]"
                     type="submit"
                 >
-                    Sign up &rarr;
+                    {post ? "Update Post" : "Create Post"}
                     <BottomGradient />
                 </button>
 
                 <div className="bg-gradient-to-r from-transparent via-neutral-300 dark:via-neutral-700 to-transparent my-8 h-[1px] w-full" />
 
-                <div className="flex flex-col space-y-4">
-                    <button
-                        className=" relative group/btn flex space-x-2 items-center justify-start px-4 w-full text-black rounded-md h-10 font-medium shadow-input bg-gray-50 dark:bg-zinc-900 dark:shadow-[0px_0px_1px_1px_var(--neutral-800)]"
-                        type="submit"
-                    >
-                        <IconBrandGithub className="h-4 w-4 text-neutral-800 dark:text-neutral-300" />
-                        <span className="text-neutral-700 dark:text-neutral-300 text-sm">
-                            GitHub
-                        </span>
-                        <BottomGradient />
-                    </button>
-                    <button
-                        className=" relative group/btn flex space-x-2 items-center justify-start px-4 w-full text-black rounded-md h-10 font-medium shadow-input bg-gray-50 dark:bg-zinc-900 dark:shadow-[0px_0px_1px_1px_var(--neutral-800)]"
-                        type="submit"
-                    >
-                        <IconBrandGoogle className="h-4 w-4 text-neutral-800 dark:text-neutral-300" />
-                        <span className="text-neutral-700 dark:text-neutral-300 text-sm">
-                            Google
-                        </span>
-                        <BottomGradient />
-                    </button>
-                    <button
-                        className=" relative group/btn flex space-x-2 items-center justify-start px-4 w-full text-black rounded-md h-10 font-medium shadow-input bg-gray-50 dark:bg-zinc-900 dark:shadow-[0px_0px_1px_1px_var(--neutral-800)]"
-                        type="submit"
-                    >
-                        <IconBrandOnlyfans className="h-4 w-4 text-neutral-800 dark:text-neutral-300" />
-                        <span className="text-neutral-700 dark:text-neutral-300 text-sm">
-                            OnlyFans
-                        </span>
-                        <BottomGradient />
-                    </button>
-                </div>
+                {
+                    post && (
+                        <div className="flex flex-col space-y-2 mb-4">
+                            <Image
+                                src={`${getFilePreview(post?.featuredImage)}`}
+                                alt={post?.title}
+                                width={100}
+                                height={100}
+                            />
+                        </div>
+                    )
+                }
             </form>
         </div>
     );

@@ -7,7 +7,7 @@ import Link from "next/link";
 import parse from "html-react-parser";
 import { getFilePreview } from "@/appwrite/sotrage";
 
-export function ThreeDCardDemo({ post }: { post: { $id: string, title: string, featuredImage: string, content: string } }) {
+export function PostCard({ post }: { post: { $id: string, title: string, featuredImage: string, content: string } }) {
 
   const { $id, title, featuredImage, content } = post;
 

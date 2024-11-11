@@ -1,5 +1,5 @@
 "use client";
-import React, { useRef } from "react";
+import React, { useRef, useEffect } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -12,21 +12,23 @@ import { useForm } from "react-hook-form";
 import { Controller } from "react-hook-form";
 import { Editor as TinyMCEEditor } from 'tinymce'; // Import the correct Editor type
 import { Editor } from '@tinymce/tinymce-react'; // Import the React component
-import { useRouter } from "next/navigation";
-import { uploadFile, deleteFile, getFilePreview } from "@/appwrite/sotrage";
+import { uploadFile, deleteFile, getFilePreview } from "@/appwrite/storage";
 import { useSelector } from "react-redux";
 import { FileUpload } from "./ui/file-upload";
 import { createPost, updatePost } from "@/appwrite/database";
 import Select from "./Select";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 export function PostForm({ post }: { post?: any }) {
 
-    const { register, handleSubmit, control, formState: { errors } } = useForm({
+    const router = useRouter();
+
+    const { register, handleSubmit, control, reset, formState: { errors } } = useForm({
         defaultValues: {
             title: post?.title || "",
             content: post?.content || "",
             status: post?.status || "",
-            image: null, // Initialize the image field
+            image: null,
         },
     });
 
@@ -42,14 +44,17 @@ export function PostForm({ post }: { post?: any }) {
         'alignright alignjustify | bullist numlist outdent indent | ' +
         'removeformat | help'
 
+
     const onPostFormSubmit = async (data: any) => {
         let dbPost;
         try {
             if (post) {
                 let featuredImage = post.featuredImage;
-                if (data.image[0]) {
+                if (data.image?.[0]) {
                     const file = await uploadFile(data.image[0]);
-                    await deleteFile(post.featuredImage);
+                    if (post.featuredImage) {
+                        await deleteFile(post.featuredImage);
+                    }
                     featuredImage = file.$id;
                 }
                 dbPost = await updatePost(post.$id, {
@@ -57,6 +62,9 @@ export function PostForm({ post }: { post?: any }) {
                     featuredImage
                 });
             } else {
+                if (!data.image?.[0]) {
+                    throw new Error("Image is required for new posts");
+                }
                 const file = await uploadFile(data.image[0]);
                 dbPost = await createPost({
                     ...data,
@@ -64,6 +72,7 @@ export function PostForm({ post }: { post?: any }) {
                     userId: userData.$id,
                 });
             }
+            router.push(`/post/${dbPost.$id}`);
         } catch (error) {
             console.error(error);
         }
@@ -75,7 +84,7 @@ export function PostForm({ post }: { post?: any }) {
                 Welcome to MegaBlogApp
             </h2>
             <p className="text-neutral-600 text-sm max-w-sm mt-2 dark:text-neutral-300">
-                Create a new post
+                {post ? "Edit your post" : "Create a new post"}
             </p>
 
             <form className="my-8 w-full" onSubmit={handleSubmit(onPostFormSubmit)}>
@@ -83,7 +92,7 @@ export function PostForm({ post }: { post?: any }) {
                     {/* Title */}
                     <LabelInputContainer>
                         <Label htmlFor="title">Title</Label>
-                        <Input id="title" placeholder="Title" type="text" {...register("title")} />
+                        <Input id="title" placeholder="Title" type="text"  {...register("title")} />
                     </LabelInputContainer>
 
                     {/* Content Editor */}
@@ -96,7 +105,6 @@ export function PostForm({ post }: { post?: any }) {
                                 onInit={(evt, editor) => {
                                     editorRef.current = editor; // This will now work without type errors
                                 }}
-                                initialValue={post?.content || ""}
                                 value={value}
                                 onEditorChange={onChange}
                                 init={{
@@ -120,7 +128,9 @@ export function PostForm({ post }: { post?: any }) {
                         name={`image`}
                         control={control}
                         render={({ field: { onChange } }) => (
-                            <FileUpload onChange={(files) => onChange(files)} />
+                            <FileUpload 
+                                onChange={(files) => onChange(files)}  
+                            />
                         )}
                     />
 
@@ -128,9 +138,9 @@ export function PostForm({ post }: { post?: any }) {
                     <Select
                         label="Status:"
                         options={['active', 'inactive']}
-                        className="mb-4"
+                        className="mb-4 w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200 ease-in-out hover:border-blue-400"
                         {...register("status")}
-                        errors={errors}
+                        errors={errors.status?.message as string}
                     />
                 </div>
 
@@ -146,9 +156,12 @@ export function PostForm({ post }: { post?: any }) {
 
                 {
                     post && (
-                        <div className="flex flex-col space-y-2 mb-4">
+                        <div className="flex flex-col space-y-5 mb-4">
+                            <div className="text-center text-4xl font-bold text-neutral-600 dark:text-neutral-300">Current Image</div>
                             <Image
+                                unoptimized
                                 src={`${getFilePreview(post?.featuredImage)}`}
+                                className="w-[70%] h-[50%] rounded-full self-center"
                                 alt={post?.title}
                                 width={100}
                                 height={100}

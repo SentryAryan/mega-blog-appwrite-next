@@ -1,29 +1,36 @@
 import React, { useEffect } from "react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { useRouter } from "next/navigation";
 import { RootState } from "@/redux/store";
-import { BackgroundBeamsWithCollision } from "@/components/ui/background-beams-with-collision";
-
+import { getCurrentUser } from "@/appwrite/auth";
+import { login, logout } from "@/redux/slices/authSlice";
+import { setLoading } from "@/redux/slices/loadingSlice";
 export default function LoginSignupLayout({ children }: { children: React.ReactNode }) {
-
     const router = useRouter();
+    const dispatch = useDispatch();
     const authStatus = useSelector((state: RootState) => state.auth.status);
+    const loading = useSelector((state: RootState) => state.loading.loading);
 
     useEffect(() => {
-        if (authStatus) {
-            router.push("/");
-        }
-    }, [authStatus, router]);
+        const checkAuth = async () => {
+            try {
+                const userData = await getCurrentUser();
+                if (userData) {
+                    dispatch(setLoading(true));
+                    dispatch(login(userData));
+                    router.replace("/");
+                }
+            } catch (error) {
+                dispatch(logout());
+            }
+        };
+        
+        checkAuth();
+    }, [dispatch, router]);
 
-    return (
-        <>
-            {authStatus ? (
-                <div className="flex justify-center items-center h-screen">
-                    Already Logged In
-                </div>
-            ) : (
-                <>{children}</>
-            )}
-        </>
-    );
+    if (authStatus) {
+        return null;
+    }
+
+    return <>{children}</>;
 }

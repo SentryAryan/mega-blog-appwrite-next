@@ -9,6 +9,7 @@ import { RootState } from "@/redux/store";
 import { logout } from "@/redux/slices/authSlice";
 import { useRouter } from "next/navigation";
 import { BackgroundBeamsWithCollision } from "@/components/ui/background-beams-with-collision";
+import { setLoading } from "@/redux/slices/loadingSlice";
 
 export function NavBarMenu() {
     return (
@@ -24,11 +25,14 @@ function Navbar({ className }: { className?: string }) {
 
     const deleteSession = async () => {
         try {
+            dispatch(setLoading(true));
             await appwriteLogout();
             dispatch(logout());
+            dispatch(setLoading(false));
             router.push("/login");
         } catch (error) {
             console.error(error);
+            dispatch(setLoading(false));
         }
     }
 

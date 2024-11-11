@@ -1,13 +1,12 @@
 'use client'
 import React from 'react'
-import { BackgroundBeamsWithCollision } from '@/components/ui/background-beams-with-collision'
 import { PostForm } from '@/components/PostForm'
 import AuthLayout from '@/components/AuthLayout'
 
 function AddPostPage() {
   return (
     <AuthLayout>
-      <div className='py-24 px-10 w-screen min-h-screen'>
+      <div className='pt-20 px-10 w-screen min-h-screen overflow-hidden'>
         <PostForm />
       </div>
     </AuthLayout>

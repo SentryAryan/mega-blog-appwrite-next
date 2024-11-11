@@ -1,8 +1,8 @@
 import React, { useState } from 'react'
 import { getAllPosts } from '@/appwrite/database'
 import { useEffect } from 'react'
-import { PostCard } from '@/components/3dPostCard'
-import { LoaderComponent } from './LoaderComponent'
+import { LoaderComponent } from '@/components/LoaderComponent'
+import { PostCard2 } from './PostCard2'
 
 function AllPosts() {
 
@@ -30,9 +30,9 @@ function AllPosts() {
         <>
             {loading ? <LoaderComponent /> : (
                 posts.length > 0 ? (
-                    <div className='w-full flex flex-wrap gap-4'>
+                    <div className='max-w-7xl mx-auto mt-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 py-4'>
                         {posts.map((post: any) => (
-                            <PostCard key={post.$id} post={post} />
+                            <PostCard2 key={post.$id} post={post} />
                         ))}
                     </div>
                 ) : (

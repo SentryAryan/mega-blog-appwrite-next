@@ -16,6 +16,7 @@ import {
     IconBrandGoogle,
     IconBrandOnlyfans,
 } from "@tabler/icons-react";
+import { setLoading } from "@/redux/slices/loadingSlice";
 
 const schema = z.object({   
     email: z.string().email({ message: "Invalid email address" }).min(1, { message: "Email is required" }),
@@ -33,6 +34,7 @@ export default function SignupForm() {
 
     const onSubmit = async (data: z.infer<typeof schema>) => {
         try {
+            dispatch(setLoading(true));
             const session = await appwriteLogin(data);
             const userData = await getCurrentUser();
             dispatch(login(userData));

@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { signup } from "@/appwrite/auth";
 import { useDispatch } from "react-redux";
 import { login } from "@/redux/slices/authSlice";
+import { setLoading } from "@/redux/slices/loadingSlice";
 import { useRouter } from "next/navigation";
 import {
     IconBrandGithub,
@@ -34,6 +35,7 @@ export default function SignupForm() {
 
     const onSubmit = async (data: z.infer<typeof schema>) => {
         try {
+            dispatch(setLoading(true));
             const userData = await signup(data);
             dispatch(login(userData));
             toast.success("Signup successful");

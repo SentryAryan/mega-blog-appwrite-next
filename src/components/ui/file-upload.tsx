@@ -34,14 +34,8 @@ export const FileUpload = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = (newFiles: File[]) => {
-    // Validate file types if needed
-    const validFiles = newFiles.filter(file => file.type.startsWith('image/'));
-    if (validFiles.length > 0) {
-      setFiles((prevFiles) => [...prevFiles, ...validFiles]);
-      onChange && onChange(validFiles);
-    } else {
-      console.log("Only image files are allowed.");
-    }
+    setFiles((prevFiles) => [...prevFiles, ...newFiles]);
+    onChange && onChange(newFiles);
   };
 
   const handleClick = () => {
@@ -68,7 +62,6 @@ export const FileUpload = ({
           ref={fileInputRef}
           id="file-upload-handle"
           type="file"
-          accept="image/*" // Accept only image files
           onChange={(e) => handleFileChange(Array.from(e.target.files || []))}
           className="hidden"
         />

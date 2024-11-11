@@ -36,6 +36,9 @@
 
     --teal-light: #4AC0A4;
     --teal-dark: #00796B;
+
+    --blue-500: rgba(59, 130, 246, 0.5);
+    --neutral-700: rgba(64, 64, 64, 0.1);
   }
 
   .dark {

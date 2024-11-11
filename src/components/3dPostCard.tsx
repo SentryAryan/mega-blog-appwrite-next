@@ -1,15 +1,29 @@
 "use client";
 
 import Image from "next/image";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { CardBody, CardContainer, CardItem } from "@/components/ui/3d-card";
 import Link from "next/link";
 import parse from "html-react-parser";
-import { getFilePreview } from "@/appwrite/sotrage";
+import { getFilePreview } from "@/appwrite/storage";
 
-export function PostCard({ post }: { post: { $id: string, title: string, featuredImage: string, content: string } }) {
+export default function PostCard1({ post }: { post: { $id: string, title: string, featuredImage: string, content: string } }) {
 
   const { $id, title, featuredImage, content } = post;
+  const [imgUrl, setImgUrl] = useState<string | null>(null);
+
+  async function fetchImage() {
+    try {
+      const imgUrl = await getFilePreview(featuredImage);
+      setImgUrl(imgUrl.href);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  useEffect(() => {
+    fetchImage();
+  }, [featuredImage])
 
   return (
     <CardContainer className="inter-var">
@@ -28,13 +42,15 @@ export function PostCard({ post }: { post: { $id: string, title: string, feature
           {`${parse(content.substring(0, 100))}...`}
         </CardItem>
         <CardItem translateZ="100" className="w-full mt-4">
-          <Image
-            src={`${getFilePreview(featuredImage)}`}
-            height="1000"
-            width="1000"
-            className="h-60 w-full object-cover rounded-xl group-hover/card:shadow-xl"
-            alt="thumbnail"
-          />
+          {imgUrl && (
+            <Image
+              src={imgUrl || ""}
+              height="1000"
+              width="1000"
+              className="h-60 w-full object-cover rounded-xl group-hover/card:shadow-xl"
+              alt={title}
+            />
+          )}
         </CardItem>
         <div className="flex justify-between items-center mt-20">
           <CardItem

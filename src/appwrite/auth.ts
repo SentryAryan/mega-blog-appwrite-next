@@ -1,7 +1,7 @@
 'use client'
 import { account, ID } from './conf'
 
-const login = async ({email, password}: {email: string, password: string}) => {
+const login = async ({ email, password }: { email: string, password: string }) => {
     try {
         const session = await account.createEmailPasswordSession(email, password)
         return session
@@ -10,10 +10,10 @@ const login = async ({email, password}: {email: string, password: string}) => {
     }
 }
 
-const signup = async ({email, password, name}: {email: string, password: string, name: string}) => {
+const signup = async ({ email, password, name }: { email: string, password: string, name: string }) => {
     try {
         const user = await account.create(ID.unique(), email, password, name)
-        const session = await login({email, password})
+        const session = await login({ email, password })
         return user
     } catch (error) {
         throw error
@@ -28,6 +28,7 @@ const getCurrentUser = async () => {
         throw error
     }
 }
+
 const logout = async () => {
     try {
         await account.deleteSessions()

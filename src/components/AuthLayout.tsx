@@ -1,31 +1,39 @@
 import { RootState } from "@/redux/store";
 import React, { useEffect } from "react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { useRouter } from "next/navigation";
+import { getCurrentUser } from "@/appwrite/auth";
+import { login, logout } from "@/redux/slices/authSlice";
 
 const AuthLayout = ({ children }: { children: React.ReactNode }) => {
-    const authStatus = useSelector((state: RootState) => state.auth.status);
     const router = useRouter();
+    const dispatch = useDispatch();
+    const authStatus = useSelector((state: RootState) => state.auth.status);
 
     useEffect(() => {
-        if (!authStatus) {
-            router.push("/");
-        }
-    }, [authStatus, router]);
+        const checkAuth = async () => {
+            try {
+                const userData = await getCurrentUser();
+                if (userData) {
+                    dispatch(login(userData));
+                } else {
+                    dispatch(logout());
+                    router.replace("/login");
+                }
+            } catch (error) {
+                dispatch(logout());
+                router.replace("/login");
+            }
+        };
+        
+        checkAuth();
+    }, [dispatch, router]);
 
-    return (
-        <>
-            {authStatus ? (
-                <>
-                    {children}
-                </>
-            ) : (
-                <div className="flex justify-center items-center h-screen">
-                    Please Login
-                </div>
-            )}
-        </>
-    );
+    if (!authStatus) {
+        return null;
+    }
+
+    return <>{children}</>;
 };
 
 export default AuthLayout;

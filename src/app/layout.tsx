@@ -31,6 +31,9 @@ export default function RootLayout({
   const router = useRouter();
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <link rel="icon" href="/favicon.ico" />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased dark`}
         suppressHydrationWarning

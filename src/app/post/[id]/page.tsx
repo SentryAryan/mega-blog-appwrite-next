@@ -51,7 +51,7 @@ export default function HeroScrollDemo() {
 
   useEffect(() => {
     fetchPost();
-  }, [slug]);
+  }, [fetchPost, slug]);
 
   return (
     <AuthLayout>

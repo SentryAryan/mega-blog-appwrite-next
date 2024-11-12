@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { ContainerScroll } from "@/components/ui/container-scroll-animation";
 import Image from "next/image";
 import { useParams } from "next/navigation";
@@ -37,7 +37,9 @@ export default function HeroScrollDemo() {
     }
   }
 
-  const fetchPost = async () => {
+  const fetchPost = useCallback(async () => {
+    if (!slug) return;
+    
     try {
       dispatch(setLoading(true));
       const response = await getPost(slug as string);
@@ -47,11 +49,11 @@ export default function HeroScrollDemo() {
     } finally {
       dispatch(setLoading(false));
     }
-  };
+  }, [slug, dispatch]);
 
   useEffect(() => {
     fetchPost();
-  }, [fetchPost, slug]);
+  }, [fetchPost]);
 
   return (
     <AuthLayout>

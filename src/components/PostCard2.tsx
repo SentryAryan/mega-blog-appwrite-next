@@ -29,7 +29,7 @@ export function PostCard2({ post }: { post: { $id: string, title: string, featur
 
     return (
         <div key={$id} className='flex justify-center'>
-            <BackgroundGradient className="rounded-[22px] max-w-sm w-[30rem] h-[30rem] p-4 sm:p-10 bg-white dark:bg-zinc-900 flex flex-col justify-between items-start">
+            <BackgroundGradient className="rounded-[22px] max-w-sm w-[22rem] verySm:w-[30rem] h-[30rem] p-4 sm:p-10 bg-white dark:bg-zinc-900 flex flex-col justify-between items-start">
                 {imgUrl && !imageError ? (
                     <Image
                         priority

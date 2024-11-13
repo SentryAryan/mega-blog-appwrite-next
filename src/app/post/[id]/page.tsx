@@ -57,7 +57,7 @@ export default function HeroScrollDemo() {
 
   return (
     <AuthLayout>
-      <div className="flex flex-col overflow-hidden min-h-screen">
+      <div className="flex flex-col overflow-hidden min-h-screen py-40">
         {loading ? <LoaderComponent /> : post && (
           <ContainerScroll
             titleComponent={

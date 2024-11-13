@@ -5,7 +5,9 @@ import AllPosts from '@/components/AllPosts'
 export default function Home() {
   return (
     <AuthLayout>
-      <AllPosts />
+      <div className="">
+        <AllPosts />
+      </div>
     </AuthLayout>
   )
 }
